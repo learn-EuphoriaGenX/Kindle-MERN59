@@ -22,6 +22,10 @@ let postSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Like'
     }],
+    dislikes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dislike'
+    }],
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Comment'

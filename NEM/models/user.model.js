@@ -34,7 +34,7 @@ let userSchema = new Schema({
     }],
     likes: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'like'
+        ref: 'Like'
     }],
 
 

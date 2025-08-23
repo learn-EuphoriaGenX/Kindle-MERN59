@@ -4,9 +4,9 @@ const authMiddleware = require('../middlewares/auth.middleware');
 const router = express.Router()
 
 
-router.post('/login', UserLogin)
-router.post('/register', UserRegister)
-router.get('/me', authMiddleware, profile)
+router.post('/login', UserLogin) // email , password
+router.post('/register', UserRegister) // name, email, password, mobile, dob
+router.get('/me', authMiddleware, profile) // token 
 
 
 module.exports = router;

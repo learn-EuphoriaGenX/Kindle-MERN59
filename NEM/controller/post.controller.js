@@ -1,4 +1,5 @@
 const commentModel = require("../models/comment.model");
+const dislikeModel = require("../models/dislike.model");
 const likeModel = require("../models/like.model");
 const postModel = require("../models/post.model");
 const userModel = require("../models/user.model");
@@ -35,7 +36,7 @@ module.exports.getAllPosts = async (req, res) => {// get all posts
 module.exports.getPostById = async (req, res) => {// get post By Id
     let id = req.params.id;
     try {
-        let post = await postModel.findById(id)
+        let post = await postModel.findById(id).populate('comments', 'text createdAt')
         return res.status(200).send({ message: "Post Details", success: true, post: post })
     } catch (error) {
         return res.status(500).send({ message: "Internal Server Error", success: false })
@@ -43,14 +44,25 @@ module.exports.getPostById = async (req, res) => {// get post By Id
 }
 module.exports.deletePostById = async (req, res) => {// delete post By Id
     let id = req.params.id;
+    console.log("user:=>>>>>>>>>>>>>", req.user);
+
+    let userId = req?.user?._id
     try {
+        let postdetails = await postModel.findById(id)
+        console.log(postdetails);
+
+        if (postdetails.user != userId) {
+            return res.status(200).send({ message: "You have Not Deleted this", success: false })
+        }
+
         await postModel.findByIdAndDelete(id)
         return res.status(200).send({ message: "Post Deleted Successfull", success: true })
     } catch (error) {
+        console.log(error);
+
         return res.status(500).send({ message: "Internal Server Error", success: false })
     }
 }
-
 
 module.exports.commentAdd = async (req, res) => {// add comment on Particular Post
     let postId = req.params.id;
@@ -74,34 +86,19 @@ module.exports.commentAdd = async (req, res) => {// add comment on Particular Po
         return res.status(500).send({ message: "Internal Server Error", success: false })
     }
 }
-module.exports.getComment = async (req, res) => {// get comments on Particular Post
-    let postId = req.params.id;
-    try {
-        let comments = await commentModel.find({
-            post: postId
-        })
-        return res.status(200).send({ message: "All comments", success: true, comments: comments })
-    } catch (error) {
-        return res.status(500).send({ message: "Internal Server Error", success: false })
-    }
-}
 
-
-module.exports.getLikes = async (req, res) => {// get likes on Particular Post
-    let postId = req.params.id;
-    try {
-        let likes = await likeModel.find({
-            post: postId
-        })
-        return res.status(200).send({ message: "Total Likes Count", success: true, count: likes.length() })
-    } catch (error) {
-        return res.status(500).send({ message: "Internal Server Error", success: false })
-    }
-}
 module.exports.makeLike = async (req, res) => { // make like on Particular Post
     let postId = req.params.id;
-    let userId = req.usr._id;
+    let userId = req.user._id;
     try {
+
+        let existing = await likeModel.find({ post: postId, user: userId })
+        
+        
+        if (existing) {
+            return res.status(400).send({ message: "You Have Already Liked!", success: false })
+        }
+
         let newLike = await likeModel.create({
             post: postId,
             user: userId
@@ -120,18 +117,21 @@ module.exports.makeLike = async (req, res) => { // make like on Particular Post
 }
 module.exports.makeDislike = async (req, res) => { // make dislike on Particular Post
     let postId = req.params.id;
-    let userId = req.usr._id;
+    let userId = req.user._id;
     try {
-        await likeModel.deleteOne({
+        let existing = await dislikeModel.find({ post: postId, user: userId })
+        console.log(existing);
+        if (existing.length) {
+            return res.status(400).send({ message: "You Have Already Uniked!", success: false })
+        }
+
+        let newDislike = await dislikeModel.create({
             post: postId,
             user: userId
         })
-        let user = await userModel.findById(userId)
-        // user.likes.push(newLike._id) 
-        // await user.save()
-        // let post = await postModel.findById(postId)
-        // post.likes.push(newLike._id)
-        // await post.save();
+        let post = await postModel.findById(postId)
+        post.dislikes.push(newDislike._id)
+        await post.save();
         return res.status(200).send({ message: "Post Disliked Liked Successfully!", success: true })
 
     } catch (error) {

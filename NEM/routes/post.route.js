@@ -1,6 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/auth.middleware');
-const { createPost, getAllPosts, getPostById, deletePostById, commentAdd, getComment, getLikes, makeLike, makeDislike } = require('../controller/post.controller');
+const { createPost, getAllPosts, getPostById, deletePostById, commentAdd,makeLike, makeDislike } = require('../controller/post.controller');
 const router = express.Router()
 
 
@@ -10,10 +10,7 @@ router.get('/:id', authMiddleware, getPostById) // get post by id
 router.delete('/:id', authMiddleware, deletePostById) // delete post by id
 
 router.post('/:id/comment', authMiddleware, commentAdd) // add comment to particular post
-router.get('/:id/comment', authMiddleware, getComment) // get comments on particular post
 
-
-router.get('/:id/like', authMiddleware, getLikes) // get all likes to particular post
 router.post('/:id/like', authMiddleware, makeLike) // like post 
 router.post('/:id/dislike', authMiddleware, makeDislike) // dislike post
 

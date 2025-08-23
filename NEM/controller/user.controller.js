@@ -47,23 +47,26 @@ module.exports.UserRegister = async (req, res) => {
             }
             let hassedPassword = await bcrypt.hash(password, 10)
             let newUser = await userModel.create({ name, email, password: hassedPassword, mobile, dob })
+            delete newUser._doc.password
             return res.status(200).send({ message: "User created successfully", success: true, data: newUser })
         }
     } catch (error) {
         return res.status(500).send({ message: "Internal Server Error", success: false })
     }
 }
-
 module.exports.profile = async (req, res) => {
     let id = req.user._id
     try {
         let user = await userModel.findById(id)
+            .populate("posts").populate("likes");
         if (!user) {
             return res.status(400).send({ message: "User not found", success: false })
         } else {
             return res.status(200).send({ message: "User profile found", success: true, data: user })
         }
     } catch (error) {
+        console.log(error);
+        
         return res.status(500).send({ message: "Internal Server Error", success: false })
     }
 
