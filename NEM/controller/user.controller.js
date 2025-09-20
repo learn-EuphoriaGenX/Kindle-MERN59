@@ -27,7 +27,7 @@ module.exports.UserLogin = async (req, res) => {
                 let token = jwt.sign(payload, process.env.JWT_TOKEN, { expiresIn: "1h" })
 
 
-                return res.status(200).send({ message: "Login successful", success: true, token: token })
+                return res.status(200).send({ message: "Login successful", success: true, token: token, user })
             }
         }
     } catch (error) {
@@ -56,17 +56,18 @@ module.exports.UserRegister = async (req, res) => {
 }
 module.exports.profile = async (req, res) => {
     let id = req.user._id
+    const token = req.header('Authorization');
     try {
         let user = await userModel.findById(id)
             .populate("posts").populate("likes");
         if (!user) {
             return res.status(400).send({ message: "User not found", success: false })
         } else {
-            return res.status(200).send({ message: "User profile found", success: true, data: user })
+            return res.status(200).send({ message: "User profile found", success: true, user, token })
         }
     } catch (error) {
         console.log(error);
-        
+
         return res.status(500).send({ message: "Internal Server Error", success: false })
     }
 
