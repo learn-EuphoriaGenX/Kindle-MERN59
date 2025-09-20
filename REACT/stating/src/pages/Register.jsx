@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import loginImage from '../assets/images/login.jpg'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 function Register() {
+
+    let navigate = useNavigate()
 
     let [data, setData] = useState({
         name: "",
@@ -22,11 +24,11 @@ function Register() {
                 let response = await axios.post("https://kindle-backend-37ax.onrender.com/user/register", data)
                 if (response.data.success) {
                     toast.success("User Registration Successfull")
-                    window.href = "/login"
+                    navigate('/login')
                 }
             } catch (error) {
                 console.log(error);
-                return toast.error("Unknown Error Occured!")
+                return toast.error(error.response?.data?.message)
             }
 
         }
